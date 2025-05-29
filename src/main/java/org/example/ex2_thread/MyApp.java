@@ -10,6 +10,8 @@ import java.util.Random;
 
 public class MyApp extends JFrame {
 
+    TimerThread timerThread = new TimerThread();
+
     //componentele UI
     JPanel zonaDeDesenare = new JPanel();
     JPanel zona2 = new JPanel();
@@ -43,6 +45,8 @@ public class MyApp extends JFrame {
         desenareZona1();
         desenareZona2();
 
+        timerThread.start();
+
 
 
         this.setVisible(true);
@@ -75,6 +79,8 @@ public class MyApp extends JFrame {
         buttonGroup.add(radioCerc);
 
 
+
+
         radioCerc.addActionListener(e -> {
             int panelW = zonaDeDesenare.getWidth();
             int panelH = zonaDeDesenare.getHeight();
@@ -92,12 +98,11 @@ public class MyApp extends JFrame {
                     throw new DepasireZonaError("Depășire zonă de desenare");
                 }
 
-                // masurare timp
-                long now = System.currentTimeMillis();
-                if (lastTime != -1) {
-                    historyText.append("Timp de la ultima afisare: " + (now - lastTime) + " ms\n");
+                long elapsed = timerThread.getElapsed();
+                if (elapsed > 0) {
+                    historyText.append("Timp de la ultima afisare: " + elapsed + " ms\n");
                 }
-                lastTime = now;
+                timerThread.reset();
 
 
                 // 4. desenezi (curățând ce era înainte)
@@ -136,12 +141,13 @@ public class MyApp extends JFrame {
                     throw new DepasireZonaError("Depășire zonă de desenare");
                 }
 
-                // masurare timp
-                long now = System.currentTimeMillis();
-                if (lastTime != -1) {
-                    historyText.append("Timp de la ultima afisare: " + (now - lastTime) + " ms\n");
+                // înlocuim măsurarea cu System.currentTimeMillis()
+
+                long elapsed = timerThread.getElapsed();
+                if (elapsed > 0) {
+                    historyText.append("Timp de la ultima afisare: " + elapsed + " ms\n");
                 }
-                lastTime = now;
+                timerThread.reset();
 
                 // 4. desenezi (curățând ce era înainte)
                 Graphics g = zonaDeDesenare.getGraphics();

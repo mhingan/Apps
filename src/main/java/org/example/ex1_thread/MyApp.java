@@ -11,6 +11,7 @@ import java.util.Random;
 
 public class MyApp extends JFrame {
 
+    TimerThread timerThread = new TimerThread();
     // componente UI
     private final JPanel zonaDesenare = new JPanel();
     private final JPanel zona2 = new JPanel();
@@ -43,6 +44,8 @@ public class MyApp extends JFrame {
 
         add(zonaDesenare);
         add(zona2);
+
+        timerThread.start();
 
         setVisible(true);
     }
@@ -123,13 +126,11 @@ public class MyApp extends JFrame {
                         throw new DepasireZonaDesenareException();
                     }
 
-                    // masurare timp
-                    long now = System.currentTimeMillis();
-                    if (lastTime != -1) {
-                        historyText.append("Timp de la ultima afisare: "
-                                + (now - lastTime) + " ms\n");
+                    long elapsed = timerThread.getElapsed();
+                    if (elapsed > 0) {
+                        historyText.append("Timp de la ultima afisare: " + elapsed + " ms\n");
                     }
-                    lastTime = now;
+                    timerThread.reset();
 
                     // desen
                     g = zonaDesenare.getGraphics();
