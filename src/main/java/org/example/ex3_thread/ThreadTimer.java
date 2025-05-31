@@ -1,7 +1,6 @@
-package org.example.ex2_thread;
+package org.example.ex3_thread;
 
-// Clasa TimerThread extinde Thread si reprezinta un fir de executie care masoara timpul in milisecunde
-class TimerThread extends Thread {
+class ThreadTimer extends Thread {
     // Variabila 'running' controleaza daca firul de executie trebuie sa continue
     // 'volatile' asigura ca modificarile sunt vizibile imediat pentru toate thread-urile
     private volatile boolean running = true;
@@ -39,3 +38,4 @@ class TimerThread extends Thread {
         this.interrupt(); // forteaza iesirea din sleep
     }
 }
+

@@ -1,83 +1,85 @@
 package org.example.ex1_thread;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Random;
+import javax.swing.*;        // pentru componentele UI
+import java.awt.*;           // pentru desenare si layout
+import java.awt.event.*;     // pentru evenimente
+import java.io.*;            // pentru scriere in fisier
+import java.util.Random;     // pentru generare valori random
 
+// Clasa principala care extinde JFrame - fereastra aplicatiei
 public class MyApp extends JFrame {
 
+    // Firul de executie pentru masurarea timpului
     TimerThread timerThread = new TimerThread();
-    // componente UI
-    private final JPanel zonaDesenare = new JPanel();
-    private final JPanel zona2 = new JPanel();
-    private final ButtonGroup buttonGroup = new ButtonGroup();
+
+    // Componentele UI
+    private final JPanel zonaDesenare = new JPanel();   // zona unde se deseneaza
+    private final JPanel zona2 = new JPanel();          // zona cu butoane si input
+    private final ButtonGroup buttonGroup = new ButtonGroup(); // grup radio buttons
     private final JRadioButton butonPatrat  = new JRadioButton("Patrat");
     private final JRadioButton butonCerc    = new JRadioButton("Cerc");
     private final JRadioButton butonText    = new JRadioButton("Text");
     private final JLabel labelX             = new JLabel("X:");
-    private final JTextField textX          = new JTextField();
+    private final JTextField textX          = new JTextField();   // input X
     private final JLabel labelY             = new JLabel("Y:");
-    private final JTextField textY          = new JTextField();
+    private final JTextField textY          = new JTextField();   // input Y
     private final JLabel historyLabel       = new JLabel("Istoric");
-    private final JTextArea historyText     = new JTextArea();
+    private final JTextArea historyText     = new JTextArea();    // zona cu istoric
     private final JButton butonAfiseaza     = new JButton("Afiseaza");
     private final JButton butonSalveaza     = new JButton("Salveaza");
-    private final JLabel emptyLabel         = new JLabel(" ");
-    private final Random rand               = new Random();
+    private final JLabel emptyLabel         = new JLabel(" ");    // afisare erori / mesaje
+    private final Random rand               = new Random();       // generator random
 
-    // variabila pentru masurarea timpului dintre afisari
+    // Variabila pentru a tine ultima valoare de timp (optional)
     private long lastTime = -1;
 
+    // Constructorul aplicatiei
     public MyApp() {
-        setTitle("My App");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(500, 800);
-        setLayout(null);
+        setTitle("My App");                            // titlul ferestrei
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // inchide aplicatia cand apesi X
+        setSize(500, 800);                             // dimensiuni fereastra
+        setLayout(null);                               // layout absolut (cu coordonate)
 
-        setZonaDesenare();
-        setZona2();
+        setZonaDesenare();                             // configurare zona de desenare
+        setZona2();                                    // configurare zona de control
 
-        add(zonaDesenare);
+        add(zonaDesenare);                             // adaugam in fereastra
         add(zona2);
 
-        timerThread.start();
+        timerThread.start();                           // pornim cronometrul
 
-        setVisible(true);
+        setVisible(true);                              // facem fereastra vizibila
     }
 
+    // Configurare zona de desenare
     private void setZonaDesenare(){
-        zonaDesenare.setLayout(null);
+        zonaDesenare.setLayout(null);                  // layout liber
         Label zonaDesenareLabel = new Label("Zona Desenare");
         zonaDesenareLabel.setBounds(0, 0, 100, 30);
         add(zonaDesenareLabel);
-
-        zonaDesenare.setBounds(0, 30, 500, 370);
-        //zonaDesenare.setBorder(BorderFactory.createLineBorder(Color.BLACK)); - test only
+        zonaDesenare.setBounds(0, 30, 500, 370);        // pozitie si dimensiune
     }
 
+    // Configurare zona de control (butoane, input, istoric, etc.)
     private void setZona2(){
         zona2.setLayout(null);
         Label zona2Label = new Label("Forma:");
         zona2Label.setBounds(0, 420, 100, 30);
         add(zona2Label);
-
         zona2.setBounds(0, 450, 500, 350);
 
+        // Adaugam butoanele radio in zona2
         butonPatrat.setBounds(0,0,100,30);
         butonCerc.setBounds(0,30,100,30);
         butonText.setBounds(0,60,100,30);
-        buttonGroup.add(butonPatrat);
+        buttonGroup.add(butonPatrat);  // doar unul poate fi selectat
         buttonGroup.add(butonCerc);
         buttonGroup.add(butonText);
         zona2.add(butonPatrat);
         zona2.add(butonCerc);
         zona2.add(butonText);
 
+        // Campuri pentru X si Y
         labelX.setBounds(10, 90, 100, 30);
         textX.setBounds(40, 90, 100, 30);
         zona2.add(labelX);
@@ -88,53 +90,58 @@ public class MyApp extends JFrame {
         zona2.add(labelY);
         zona2.add(textY);
 
+        // Eticheta si zona de text pentru istoric
         historyLabel.setBounds(10, 150, 100, 30);
         historyText.setBounds(40, 180, 420, 70);
         zona2.add(historyLabel);
         zona2.add(historyText);
 
+        // Eticheta pentru mesaje
         emptyLabel.setBounds(10, 260, 480, 30);
         zona2.add(emptyLabel);
 
+        // Butoane de afisare si salvare
         butonAfiseaza.setBounds(40, 300, 100, 30);
         butonSalveaza.setBounds(220, 300, 100, 30);
         zona2.add(butonAfiseaza);
         zona2.add(butonSalveaza);
 
-        // listener "Afiseaza"
+        // Eveniment pentru butonul "Afiseaza"
         butonAfiseaza.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Graphics g = null;
                 try {
-                    int x = Integer.parseInt(textX.getText().trim());
-                    int y = Integer.parseInt(textY.getText().trim());
+                    int x = Integer.parseInt(textX.getText().trim()); // citim X
+                    int y = Integer.parseInt(textY.getText().trim()); // citim Y
 
                     int w = zonaDesenare.getWidth();
                     int h = zonaDesenare.getHeight();
 
-                    // dimensiune clasica (fara ?:)
+                    // dimensiunea formei
                     int size;
                     if (butonText.isSelected()) {
-                        size = 50;
+                        size = 50; // font fix pentru text
                     } else {
-                        size = 10 + rand.nextInt(Math.min(w, h) - 10);
+                        size = 10 + rand.nextInt(Math.min(w, h) - 10); // random
                     }
 
-                    // verifica depasire
+                    // verificam daca forma iese din zona de desen
                     if (x < 0 || y < 0 || x + size > w || y + size > h) {
-                        throw new DepasireZonaDesenareException();
+                        throw new DepasireZonaDesenareException(); // aruncam exceptie personalizata
                     }
 
+                    // afisam timpul scurs de la ultima apasare
                     long elapsed = timerThread.getElapsed();
                     if (elapsed > 0) {
                         historyText.append("Timp de la ultima afisare: " + elapsed + " ms\n");
                     }
-                    timerThread.reset();
+                    timerThread.reset(); // resetam timerul
 
-                    // desen
+                    // desenam forma
                     g = zonaDesenare.getGraphics();
-                    g.clearRect(0, 0, w, h);
+                    g.clearRect(0, 0, w, h); // curatam zona
+
                     if (butonPatrat.isSelected()) {
                         g.drawRect(x, y, size, size);
                         historyText.append("Patrat - X:" + x + " Y:" + y + " size:" + size + "\n");
@@ -158,29 +165,25 @@ public class MyApp extends JFrame {
                     emptyLabel.setText(ex.getMessage());
                 }
                 finally {
-                    if (g != null) g.dispose();
+                    if (g != null) g.dispose(); // eliberam resursa grafica
                 }
             }
         });
 
-        // listener "Salveaza"
+        // Eveniment pentru butonul "Salveaza"
         butonSalveaza.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try (BufferedWriter bw = new BufferedWriter(new FileWriter("thread_ex1.txt"))) {
-                    bw.write(historyText.getText());
+                    bw.write(historyText.getText()); // scriem istoric in fisier
                     emptyLabel.setForeground(Color.GREEN);
                     emptyLabel.setText("Date scrise cu succes in fisier.");
                 }
                 catch (IOException ioE) {
                     emptyLabel.setForeground(Color.RED);
-                    emptyLabel.setText(ioE.getMessage());
+                    emptyLabel.setText(ioE.getMessage()); // afisam eroarea
                 }
             }
         });
     }
-
-
-
-
 }
